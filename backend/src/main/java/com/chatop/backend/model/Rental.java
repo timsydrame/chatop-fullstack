@@ -5,8 +5,7 @@ import jakarta.persistence .*;
 
     @Entity
     @Table(name = "rentals")
-    @Getter
-    @Setter
+   @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder

@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String path = request.getServletPath();
 
-        // 🔥 On laisse passer les routes d'auth sans vérifier le JWT
+        //  On laisse passer les routes d'auth sans vérifier le JWT
         if (path.startsWith("/api/auth")) {
             filterChain.doFilter(request, response);
             return;
