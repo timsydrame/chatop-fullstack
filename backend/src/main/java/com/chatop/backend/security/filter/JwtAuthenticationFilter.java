@@ -1,7 +1,7 @@
 package com.chatop.backend.security.filter;
 
-import com.chatop.backend.security.service.JwtService;
-import com.chatop.backend.security.service.UserDetailsServiceImpl;
+import com.chatop.backend.service.JwtService;
+import com.chatop.backend.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

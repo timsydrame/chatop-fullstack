@@ -1,11 +1,11 @@
-package com.chatop.backend.security.service;
+package com.chatop.backend.service;
 
 import com.chatop.backend.exeption.InvalidCredentialsException;
 import com.chatop.backend.model.User;
 import com.chatop.backend.repository.UserRepository;
-import com.chatop.backend.security.dto.AuthenticationRequest;
-import com.chatop.backend.security.dto.AuthenticationResponse;
-import com.chatop.backend.security.dto.RegisterRequest;
+import com.chatop.backend.dto.AuthenticationRequest;
+import com.chatop.backend.dto.AuthenticationResponse;
+import com.chatop.backend.dto.RegisterRequest;
 import com.chatop.backend.security.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,11 +43,7 @@ public class AuthService {
         userRepository.save(user);
 
         String token = jwtService.generateToken(
-                org.springframework.security.core.userdetails.User
-                        .withUsername(user.getEmail())
-                        .password(user.getPassword())
-                        .authorities("USER")
-                        .build()
+                user.getEmail()
         );
 
         return new AuthenticationResponse(token);
@@ -72,11 +68,7 @@ public class AuthService {
                 .orElseThrow(InvalidCredentialsException::new);
 
         String token = jwtService.generateToken(
-                org.springframework.security.core.userdetails.User
-                        .withUsername(user.getEmail())
-                        .password(user.getPassword())
-                        .authorities("USER")
-                        .build()
+                user.getEmail()
         );
 
         return new AuthenticationResponse(token);

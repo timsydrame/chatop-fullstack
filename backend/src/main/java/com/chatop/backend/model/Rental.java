@@ -1,33 +1,38 @@
 package com.chatop.backend.model;
 
-import jakarta.persistence .*;
-        import lombok .*;
+import jakarta.persistence.*;
+import lombok.*;
 
-    @Entity
-    @Table(name = "rentals")
-   @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public class Rental {
+import java.time.LocalDate;
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+@Entity
+@Table(name = "rentals")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Rental {
 
-        @Column(nullable = false)
-        private String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        private Double surface;
-        private Double price;
+    @Column(nullable = false)
+    private String name;
 
-        @Column(length = 1000)
-        private String description;
+    private Double surface;
+    private Double price;
 
-        private String picture;
+    @Column(length = 1000)
+    private String description;
 
-        @ManyToOne
-        @JoinColumn(name = "owner_id")
-        private User owner;
-    }
+    private String picture;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
+}
 

@@ -1,4 +1,4 @@
-package com.chatop.backend.security.dto;
+package com.chatop.backend.dto;
 
 import lombok.Data;
 
