@@ -2,15 +2,16 @@ package com.chatop.backend.controller;
 
 import com.chatop.backend.model.User;
 import com.chatop.backend.repository.UserRepository;
-import com.chatop.backend.security.dto.AuthenticationRequest;
-import com.chatop.backend.security.dto.AuthenticationResponse;
-import com.chatop.backend.security.dto.RegisterRequest;
-import com.chatop.backend.security.dto.UserResponse;
-import com.chatop.backend.security.service.AuthService;
+import com.chatop.backend.dto.AuthenticationRequest;
+import com.chatop.backend.dto.AuthenticationResponse;
+import com.chatop.backend.dto.RegisterRequest;
+import com.chatop.backend.dto.UserResponse;
+import com.chatop.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 
 @RestController
@@ -32,18 +33,17 @@ public class AuthController {
 
 
     // LOGIN
-    @PostMapping("/email")
+    @PostMapping("/login")
     public AuthenticationResponse login(@RequestBody AuthenticationRequest request) {
         return authService.login(request);
     }
 
     //  ME (Profil utilisateur connecté)
     @GetMapping("/me")
-    public UserResponse me(@RequestHeader("Authorization") String auth) {
-        String token = auth.substring(7);
-        String email = authService.getEmailFromToken(token);
+    public UserResponse me(Principal principal) {
 
-        User user = userRepository.findByEmail(email).orElseThrow();
+
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
 
         UserResponse response = new UserResponse();
         response.setId(user.getId());

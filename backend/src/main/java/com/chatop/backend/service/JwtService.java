@@ -1,4 +1,4 @@
-package com.chatop.backend.security.service;
+package com.chatop.backend.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -8,17 +8,21 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.nimbusds.jwt.JWTClaimNames.EXPIRATION_TIME;
+
 @Service
 public class JwtService {
+    public static final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     private static final String SECRET_KEY = "1234567890AZERTYUIOPQSDFGHJKLMWXCVBN1234567890AZERTYUIOPQSDFGHJKLMWXCVBN"; // clé secrète (à changer plus tard)
-
+    private static final long EXPIRATION_TIME = 3600_000; // 1h
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -28,18 +32,15 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public static String generateToken(String username) {
         return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24h
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .setSubject(username)                    // utilisateur
+                .setIssuedAt(new Date())                 // date d’émission
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // date d’expiration
+                .signWith(key)                           // signature
                 .compact();
+
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

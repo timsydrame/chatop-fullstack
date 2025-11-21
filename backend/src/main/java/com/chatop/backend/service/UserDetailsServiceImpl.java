@@ -1,4 +1,4 @@
-package com.chatop.backend.security.service;
+package com.chatop.backend.service;
 
 import com.chatop.backend.model.User;
 import com.chatop.backend.repository.UserRepository;

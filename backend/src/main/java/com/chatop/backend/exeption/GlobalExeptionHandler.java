@@ -13,7 +13,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExeptionHandler {
 
-    //  Erreurs de validation (400)
+    // 400 → Erreurs de validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -25,35 +25,34 @@ public class GlobalExeptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    // 400 → Body manquant
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleBodyMissing(HttpMessageNotReadableException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("message", "error");
-        return ResponseEntity.badRequest().body(body);
+        return ResponseEntity.badRequest().body(Map.of("message", "error"));
     }
 
-
-    // INVALID_CREDENTIALS → 401 (Mockoon)
+    // 401 → Mauvais email/mot de passe
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleInvalidCredentials() {
         return ResponseEntity.status(401).body(Map.of("message", "error"));
     }
 
-
-    // Autres runtime exceptions → 400 par défaut
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-
-        return ResponseEntity.badRequest().body(body);
-    }
-
+    // 401 → JWT invalide ou expiré
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<Map<String, String>> handleJwtException(JwtException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("message", "Unauthorized");
-        return ResponseEntity.status(401).body(body);
+        return ResponseEntity.status(401).body(Map.of("message", "Unauthorized"));
     }
 
+    // 400 / 404 → Runtime exception + gestion personnalisée
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
+
+        // 404 rental not found
+        if ("RENTAL_NOT_FOUND".equals(ex.getMessage())) {
+            return ResponseEntity.status(404).body(Map.of("message", "error"));
+        }
+
+        // 400 générique
+        return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+    }
 }
