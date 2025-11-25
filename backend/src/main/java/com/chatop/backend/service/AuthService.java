@@ -6,7 +6,6 @@ import com.chatop.backend.repository.UserRepository;
 import com.chatop.backend.dto.AuthenticationRequest;
 import com.chatop.backend.dto.AuthenticationResponse;
 import com.chatop.backend.dto.RegisterRequest;
-import com.chatop.backend.security.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -75,14 +74,13 @@ public class AuthService {
     }
 
 
-
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthFilter;
-
-
-
     public String getEmailFromToken(String token) {
         return jwtService.extractUsername(token);
     }
 
+    public Long getUserIdFromEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+        return user.getId();
+    }
 }
