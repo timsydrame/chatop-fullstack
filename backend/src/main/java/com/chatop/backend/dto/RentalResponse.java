@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class RentalResponse {
 
     private Long id;
@@ -18,4 +19,3 @@ public class RentalResponse {
     private String created_at;
     private String updated_at;
 }
-

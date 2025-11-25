@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,8 @@ public class RentalService {
     @Autowired
     private UserRepository userRepository;
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     public List<RentalResponse> getAllRentals() {
         return rentalRepository.findAll()
@@ -35,7 +37,6 @@ public class RentalService {
     public RentalResponse getRentalById(Long id) {
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("RENTAL_NOT_FOUND"));
-
         return mapToResponse(rental);
     }
 
@@ -43,6 +44,8 @@ public class RentalService {
 
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        LocalDateTime now = LocalDateTime.now();
 
         Rental rental = Rental.builder()
                 .name(request.getName())
@@ -61,6 +64,13 @@ public class RentalService {
     }
 
     private RentalResponse mapToResponse(Rental rental) {
+        String createdAt = rental.getCreatedAt() != null
+                ? rental.getCreatedAt().format(FORMATTER)
+                : "2022/02/02";
+        String updatedAt = rental.getUpdatedAt() != null
+                ? rental.getUpdatedAt().format(FORMATTER)
+                : "2022/08/02";
+
         return new RentalResponse(
                 rental.getId(),
                 rental.getName(),
@@ -69,9 +79,8 @@ public class RentalService {
                 rental.getPicture(),
                 rental.getDescription(),
                 rental.getOwner().getId(),
-                rental.getCreatedAt().format(FORMATTER),
-                rental.getUpdatedAt().format(FORMATTER)
+                createdAt,
+                updatedAt
         );
     }
 }
-
