@@ -27,5 +27,6 @@ public class Message {
     private Rental rental;
 
     @Column(name = "created_at")
-    private String createdAt;
+    private String createdAt; // ok, surtout si tu veux coller à Mockoon
 }
+
