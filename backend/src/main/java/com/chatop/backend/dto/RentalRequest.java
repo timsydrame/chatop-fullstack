@@ -19,7 +19,5 @@ public class RentalRequest {
     @NotBlank
     private String description;
 
-    // pour l’instant simple String (Mockoon accepte ça)
-    @NotBlank
-    private String picture;
+
 }
