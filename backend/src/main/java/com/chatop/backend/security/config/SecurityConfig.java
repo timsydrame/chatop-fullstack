@@ -39,11 +39,16 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
-                                "/uploads/**"
+                                "/uploads/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                // nouvelle façon de configurer le JWT sans deprecated
+                // configurer le JWT sans deprecated
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(Customizer.withDefaults())
                 )
@@ -58,11 +63,19 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/uploads/**");
+        return web -> web.ignoring().requestMatchers(
+                "/uploads/**",
+                // On dit à Spring Security d'IGNORER Swagger et la doc OpenAPI
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/v3/api-docs",
+                "/v3/api-docs/**",
+                "/v3/api-docs.yaml"
+        );
     }
 
 
-    // 🔥 CORS FULL OPEN (Angular <-> Spring)
+    // CORS FULL OPEN (Angular <-> Spring)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
