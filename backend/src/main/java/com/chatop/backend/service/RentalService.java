@@ -1,5 +1,6 @@
 package com.chatop.backend.service;
 
+import com.chatop.backend.dto.RentalRequest;
 import com.chatop.backend.dto.RentalResponse;
 import com.chatop.backend.model.Rental;
 import com.chatop.backend.model.User;
@@ -57,15 +58,9 @@ public class RentalService {
     // 3) CREATE RENTAL + UPLOAD
     // ------------------------------------------
     public RentalResponse createRental(
-            String name,
-            Double surface,
-            Double price,
-            String description,
-            MultipartFile picture,
-            Long ownerId
+            RentalRequest rentalRequest, String email
     ) throws IOException {
-
-        User owner = userRepository.findById(ownerId)
+        User ownerUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
 
         // dossier uploads/
@@ -74,18 +69,18 @@ public class RentalService {
         if (!uploadFolder.exists()) uploadFolder.mkdirs();
 
         // nom unique du fichier
-        String uniqueName = UUID.randomUUID() + "_" + picture.getOriginalFilename();
+        String uniqueName = UUID.randomUUID() + "_" + rentalRequest.getPicture().getOriginalFilename();
         Path picturePath = Paths.get(uploadDir + uniqueName);
 
-        Files.copy(picture.getInputStream(), picturePath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(rentalRequest.getPicture().getInputStream(), picturePath, StandardCopyOption.REPLACE_EXISTING);
 
         Rental rental = Rental.builder()
-                .name(name)
-                .surface(surface)
-                .price(price)
-                .description(description)
+                .name(rentalRequest.getName())
+                .surface(rentalRequest.getSurface())
+                .price(rentalRequest.getPrice())
+                .description(rentalRequest.getDescription())
                 .picture(uniqueName)
-                .owner(owner)
+                .owner(ownerUser)
                 .createdAt(LocalDate.now())
                 .updatedAt(LocalDate.now())
                 .build();
@@ -94,6 +89,51 @@ public class RentalService {
 
         return mapToResponse(rental);
     }
+
+    public RentalResponse updateRental(Long id, RentalRequest rentalRequest, String email) throws IOException {
+
+        User ownerUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        Rental rental = rentalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("RENTAL_NOT_FOUND"));
+
+        // Vérifier que l’utilisateur connecté est bien le propriétaire
+        if (!rental.getOwner().getId().equals(ownerUser.getId())) {
+            throw new RuntimeException("NOT_ALLOWED");
+        }
+
+        rental.setName(rentalRequest.getName());
+        rental.setSurface(rentalRequest.getSurface());
+        rental.setPrice(rentalRequest.getPrice());
+        rental.setDescription(rentalRequest.getDescription());
+
+        // Upload d’une nouvelle image si elle existe
+        if (rentalRequest.getPicture() != null && !rentalRequest.getPicture().isEmpty()) {
+
+            String uploadDir = "uploads/";
+            File uploadFolder = new File(uploadDir);
+            if (!uploadFolder.exists()) uploadFolder.mkdirs();
+
+            String uniqueName = UUID.randomUUID() + "_" +
+                    rentalRequest.getPicture().getOriginalFilename();
+
+            Path picturePath = Paths.get(uploadDir + uniqueName);
+
+            Files.copy(rentalRequest.getPicture().getInputStream(),
+                    picturePath,
+                    StandardCopyOption.REPLACE_EXISTING);
+
+            rental.setPicture(uniqueName);
+        }
+
+        rental.setUpdatedAt(LocalDate.now());
+
+        rentalRepository.save(rental);
+
+        return mapToResponse(rental);
+    }
+
 
     // ------------------------------------------
     // 4) mapToResponse
@@ -104,11 +144,13 @@ public class RentalService {
                 rental.getName(),
                 rental.getSurface(),
                 rental.getPrice(),
-                "http://localhost:8080/uploads/" + rental.getPicture(), // 👍 URL complète
+                "http://localhost:8080/uploads/" + rental.getPicture(), //  URL complète
                 rental.getDescription(),
                 rental.getOwner().getId(),
                 rental.getCreatedAt().format(FORMATTER),
                 rental.getUpdatedAt().format(FORMATTER)
         );
     }
+
+
 }

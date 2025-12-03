@@ -7,6 +7,7 @@ import com.chatop.backend.dto.AuthenticationResponse;
 import com.chatop.backend.dto.RegisterRequest;
 import com.chatop.backend.dto.UserResponse;
 import com.chatop.backend.service.AuthService;
+import com.chatop.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,47 +24,25 @@ public class AuthController {
     private AuthService authService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private UserRepository userRepository;
 
     @PostMapping("/register")
     public AuthenticationResponse register(@RequestBody @Valid RegisterRequest request) {
         return authService.register(request);
     }
-
-
-
     // LOGIN
     @PostMapping("/login")
     public AuthenticationResponse login(@RequestBody AuthenticationRequest request) {
         return authService.login(request);
     }
-
     //  ME (Profil utilisateur connecté)
     @GetMapping("/me")
     public UserResponse me(Principal principal) {
+      return   this.userService.getUserInfo(principal.getName());
 
-
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
-
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setName(user.getName());
-        response.setEmail(user.getEmail());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-
-        if (user.getCreatedAt() == null) {
-            response.setCreated_at("2022/02/02"); // valeur par défaut exigée par Mockoon
-        } else {
-            response.setCreated_at(user.getCreatedAt().format(formatter));
-        }
-
-        if (user.getUpdatedAt() == null) {
-            response.setUpdated_at("2022/08/02"); // valeur par défaut attendue
-        } else {
-            response.setUpdated_at(user.getUpdatedAt().format(formatter));
-        }
-
-        return response;
     }
 
 }
