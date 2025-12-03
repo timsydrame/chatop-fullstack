@@ -33,19 +33,13 @@ public class RentalController {
     @PostMapping(consumes = "multipart/form-data")
     public RentalResponse createRental(
             Principal principal,
-            @RequestParam("name") String name,
-            @RequestParam("surface") Double surface,
-            @RequestParam("price") Double price,
-            @RequestParam("description") String description,
-            @RequestParam("picture") MultipartFile picture
+            @ModelAttribute @Valid RentalRequest rentalRequest
     ) throws IOException {
 
         // Récupérer l'utilisateur connecté via Principal
-        Long ownerId = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"))
-                .getId();
 
-        return rentalService.createRental(name, surface, price, description, picture, ownerId);
+
+        return rentalService.createRental(rentalRequest, principal.getName());
     }
 
 
@@ -60,4 +54,15 @@ public class RentalController {
     public RentalResponse getById(@PathVariable Long id) {
         return rentalService.getRentalById(id);
     }
+
+    @PutMapping(value="/{id}", consumes = "multipart/form-data")
+    public RentalResponse updateRental(
+            Principal principal,
+            @PathVariable Long id,
+            @ModelAttribute RentalRequest rentalRequest
+    ) throws IOException {
+        return rentalService.updateRental(id, rentalRequest, principal.getName());
+    }
+
+
 }
